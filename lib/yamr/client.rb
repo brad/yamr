@@ -113,7 +113,11 @@ class Yamr::Client
   def fetch_messages()
     return false unless @y
     begin
-      messages = @y.messages(:all, :newer_than => @last_id).reverse
+      if @last_id != nil
+        messages = @y.messages(:all, :newer_than => @last_id).reverse
+      else
+        messages = @y.messages(:all).reverse
+      end
       unless messages.empty?
         notify messages unless @messages.empty?
         @messages += messages
@@ -232,7 +236,7 @@ class Yamr::Client
     # Ask Gtk to reload the view...
     Gtk.queue do
       @pos = @messages_container.vadjustment.value
-      @view.load_html_string html
+      @view.load_string(html, nil, nil, "https://www.yammer.com")
       true
     end
   end
@@ -279,7 +283,7 @@ class Yamr::Client
     @messages_container.set_policy Gtk::POLICY_NEVER, Gtk::POLICY_AUTOMATIC
     @stack.pack_start @messages_container
 
-    @view = Gtk::WebKit::WebView.new
+    @view = WebKit::WebView.new
     @messages_container.add @view
     
     # Rescroll on reload

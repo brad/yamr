@@ -1,12 +1,6 @@
 INSTALL
 -------
 sudo apt-get install ruby-gnome2-dev ruby-gnome2 libwebkit-dev
-sudo gem install yammer4r construct
-
-git clone git://github.com/danlucraft/rbwebkitgtk.git
-cd rbwekitgtk
-export RG2_DIR=/usr/lib/ruby/1.8/i486-linux/; ruby extconf.rb
-make
-sudo make install
+sudo gem install yammer4r construct gtk-webkit-ruby
 
 Then run bin/yamr
