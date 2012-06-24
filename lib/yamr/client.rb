@@ -211,6 +211,10 @@ class Yamr::Client
       date = Time.parse(message.created_at)
       user = users[message.sender_id] || users(true)[message.sender_id]
       body = message.body.parsed
+      body_urls = URI::extract(body, ['http', 'https', 'ftp'])
+      body_urls.each do |url|
+        body = body.sub url, "<a href=\"#{url}\" target=\"_blank\">#{url}</a>"
+      end
 
       # Write the message
       html << '<div class="message">'

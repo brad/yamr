@@ -7,6 +7,7 @@ require 'yammer4r'
 require 'construct'
 require 'gtk2'
 require 'webkit'
+require 'uri'
 
 module Yamr
   $LOAD_PATH.unshift File.dirname(__FILE__)
