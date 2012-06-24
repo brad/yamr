@@ -224,6 +224,11 @@ class Yamr::Client
         html << "<a class=\"delete\" href=\"yamr://delete/#{message.id}\">x</a>"
       end
       html << '<div class="body">' + body + '</div>'
+      html << '<div class="attachments">'
+      message.attachments.each do |attachment|
+        html << attachment.inline_html
+      end
+      html << '</div>'
       html << '<div class="date">' + date.relative + '</div>'
       html << '<div class="visual-clear"></div>'
       html << '</div>'
