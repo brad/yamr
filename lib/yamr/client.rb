@@ -235,7 +235,7 @@ class Yamr::Client
     
     # Ask Gtk to reload the view...
     Gtk.queue do
-      @pos = @messages_container.vadjustment.value
+      @pos.value = @messages_container.vadjustment.value
       @view.load_string(html, nil, nil, "https://www.yammer.com")
       true
     end
@@ -288,7 +288,11 @@ class Yamr::Client
     
     # Rescroll on reload
     @view.signal_connect 'load-finished' do
-      @messages_container.vadjustment.value = @pos
+      # HACK: This is requirement to get the ScrolledWindow to accept the value
+      # @pos.value += 0 does not work
+      @pos.value += 1
+      @pos.value -= 1
+      @messages_container.vadjustment = @pos
     end
 
     # Open links in the browser
@@ -314,6 +318,7 @@ class Yamr::Client
     setup
     auth
     run
+    @pos = @messages_container.vadjustment
     Gtk.main_with_queue 100
   end
 
