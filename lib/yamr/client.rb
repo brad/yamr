@@ -4,7 +4,7 @@ class Yamr::Client
   STYLE = File.read(File.join(File.dirname(__FILE__), 'css', 'style.css'))
   POLL_INTERVAL    = 60   # Seconds between checking for new messages
   REFRESH_INTERVAL = 5000 # ms between refreshing display
-  BROWSER_CMD      = 'chromium-browser'
+  BROWSER_CMD      = 'xdg-open'
   CONFIG_FILE      = File.join(ENV['HOME'], '.config', 'yamr', 'config')
 
   include Yamr::CGI
