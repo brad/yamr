@@ -90,8 +90,21 @@ class Yamr::Client
     @config.oauth.secret = access_token.secret
     save
 
+    set_hint_text
+
     # Grab initial messages
     fetch_messages
+  end
+
+  def set_hint_text
+    return false unless @y and @message_entry.text == ''
+    @message_entry.text = message_prompt
+    return true
+  end
+
+  # The current user's message prompt
+  def message_prompt
+    return current_user.web_preferences.network_settings.message_prompt
   end
  
   # The current Yammer user
@@ -125,7 +138,11 @@ class Yamr::Client
       end
     rescue => e
       puts "Error fetching new messages: #{e.inspect}"
+      @message_entry.set_sensitive false
+      @message_btn.set_sensitive false
     end
+    @message_entry.set_sensitive true
+    @message_btn.set_sensitive true
   end
 
   # Load configuration
@@ -152,9 +169,12 @@ class Yamr::Client
   end
 
   # Post an update
-  def post(str)
-    str = escape_html str
-    response = @y.message(:post, :body => str)
+  def post_update
+    text = @message_entry.text
+    return false unless message_prompt != text and text != ''
+    @message_entry.text = ''
+    text = escape_html text
+    response = @y.message(:post, :body => text)
     p response
   end
 
@@ -165,6 +185,8 @@ class Yamr::Client
 
   # Get messages, set up recurring functions...
   def run
+    set_hint_text
+
     # Get initial messages and display right away.
     Gtk.timeout_add(10) do
       fetch_messages
@@ -271,22 +293,33 @@ class Yamr::Client
     @stack.pack_start row, false
 
     # Text field
-    message_entry = Gtk::Entry.new
-    message_entry.signal_connect('activate') do
-      text = message_entry.text
-      message_entry.text = ''
-      post text
+    @message_entry = Gtk::Entry.new
+    @message_entry.set_sensitive false
+    @message_entry.modify_text Gtk::STATE_NORMAL, Gdk::Color.parse('grey66')
+    @message_entry.signal_connect('activate') do
+      post_update
     end
-    row.pack_start message_entry, true
+    @message_entry.signal_connect('focus-in-event') do
+      if @message_entry.text == message_prompt
+        @message_entry.text = ''
+        @message_entry.modify_text Gtk::STATE_NORMAL, Gdk::Color.parse('Black')
+      end
+    end
+    @message_entry.signal_connect('focus-out-event') do
+      if @message_entry.text == ''
+        @message_entry.text = message_prompt
+        @message_entry.modify_text Gtk::STATE_NORMAL, Gdk::Color.parse('grey66')
+      end
+    end
+    row.pack_start @message_entry, true
 
     # Button
-    button = Gtk::Button.new 'Yamr!'
-    button.signal_connect 'clicked' do
-      text = message_entry.text
-      message_entry.text = ''
-      post text
+    @message_btn = Gtk::Button.new 'Yamr!'
+    @message_btn.set_sensitive false
+    @message_btn.signal_connect 'clicked' do
+      post_update
     end
-    row.pack_start button, false
+    row.pack_start @message_btn, false
 
     # Messages area
     @messages_container = Gtk::ScrolledWindow.new
