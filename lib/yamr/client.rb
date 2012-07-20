@@ -98,8 +98,13 @@ class Yamr::Client
 
   def set_hint_text
     return false unless @y and @message_entry.text == ''
-    @message_entry.text = message_prompt
-    return true
+    begin
+      @message_entry.text = message_prompt
+      return true
+    rescue => e
+      puts "Error getting hint text: #{e.inspect}"
+      return false
+    end
   end
 
   # The current user's message prompt
